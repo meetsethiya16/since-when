@@ -55,7 +55,7 @@ export default function TimerCard({ timer }) {
 
   useEffect(() => {
     calc();
-    const i = setInterval(calc, 1000);
+    const i = setInterval(calc, 100);
     return () => clearInterval(i);
   }, []);
 
