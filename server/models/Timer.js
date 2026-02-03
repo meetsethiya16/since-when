@@ -10,6 +10,7 @@ const TimerSchema = new mongoose.Schema(
     showMonths: { type: Boolean, default: true },
     showDays: { type: Boolean, default: true },
     showHours: { type: Boolean, default: true },
+    showMinutes: { type: Boolean, default: true },
     showSeconds: { type: Boolean, default: true },
   },
   { timestamps: true },

@@ -61,11 +61,18 @@ export default function TimerCard({ timer }) {
 
   const { years, months, days, hours, minutes, seconds, totalSeconds } = diff;
 
-  const showMinutes = totalSeconds >= 60;
-  const showHours = totalSeconds >= 60 * 60;
-  const showDays = totalSeconds >= 24 * 60 * 60;
-  const showMonths = totalSeconds >= 30 * 24 * 60 * 60;
-  const showYears = totalSeconds >= 365 * 24 * 60 * 60;
+  const thresholdMinutes = totalSeconds >= 60;
+  const thresholdHours = totalSeconds >= 60 * 60;
+  const thresholdDays = totalSeconds >= 24 * 60 * 60;
+  const thresholdMonths = totalSeconds >= 30 * 24 * 60 * 60;
+  const thresholdYears = totalSeconds >= 365 * 24 * 60 * 60;
+
+  const showYears = timer.showYears && thresholdYears;
+  const showMonths = timer.showMonths && thresholdMonths;
+  const showDays = timer.showDays && thresholdDays;
+  const showHours = timer.showHours && thresholdHours;
+  const showMinutes = timer.showMinutes && thresholdMinutes;
+  const showSeconds = timer.showSeconds !== false;
 
   return (
     <div className="timer-value">
@@ -104,10 +111,12 @@ export default function TimerCard({ timer }) {
         </span>
       )}
 
-      <span className="timer-unit">
-        <span className="timer-number">{seconds}</span>
-        <span className="timer-label">seconds</span>
-      </span>
+      {showSeconds && (
+        <span className="timer-unit">
+          <span className="timer-number">{seconds}</span>
+          <span className="timer-label">seconds</span>
+        </span>
+      )}
     </div>
   );
 }

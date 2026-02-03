@@ -11,6 +11,7 @@ export default function TimerPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [draggingId, setDraggingId] = useState(null);
+  const [openUnitsId, setOpenUnitsId] = useState(null);
 
   const fetchTimers = async () => {
     const res = await axios.get(API);
@@ -71,6 +72,50 @@ export default function TimerPage() {
     await axios.delete(`${API}/${id}`);
     fetchTimers();
   };
+
+  const toggleUnitsMenu = (id) => {
+    setOpenUnitsId((current) => (current === id ? null : id));
+  };
+
+  const updateUnits = async (id, partial) => {
+    const existing = timers.find((t) => t._id === id);
+    if (!existing) return;
+
+    const payload = {
+      showYears:
+        typeof partial.showYears === "boolean"
+          ? partial.showYears
+          : existing.showYears,
+      showMonths:
+        typeof partial.showMonths === "boolean"
+          ? partial.showMonths
+          : existing.showMonths,
+      showDays:
+        typeof partial.showDays === "boolean"
+          ? partial.showDays
+          : existing.showDays,
+      showHours:
+        typeof partial.showHours === "boolean"
+          ? partial.showHours
+          : existing.showHours,
+      showMinutes:
+        typeof partial.showMinutes === "boolean"
+          ? partial.showMinutes
+          : existing.showMinutes,
+      showSeconds:
+        typeof partial.showSeconds === "boolean"
+          ? partial.showSeconds
+          : existing.showSeconds,
+    };
+
+    const res = await axios.patch(`${API}/${id}/units`, payload);
+
+    setTimers((prev) =>
+      prev.map((t) => (t._id === id ? { ...t, ...res.data } : t))
+    );
+  };
+
+  const activeUnitsTimer = timers.find((t) => t._id === openUnitsId);
 
   return (
     <div className="app-shell">
@@ -195,6 +240,15 @@ export default function TimerPage() {
                     >
                       Delete
                     </button>
+
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label="Timer display options"
+                      onClick={() => toggleUnitsMenu(t._id)}
+                    >
+                      ⋯
+                    </button>
                   </div>
                 </div>
               ))}
@@ -202,6 +256,104 @@ export default function TimerPage() {
           )}
         </section>
       </main>
+
+      {openUnitsId && activeUnitsTimer && (
+        <div className="units-overlay" onClick={() => setOpenUnitsId(null)}>
+          <div
+            className="units-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="units-modal-title">Units to display</p>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showYears}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showYears: e.target.checked,
+                  })
+                }
+              />
+              <span>Years</span>
+            </label>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showMonths}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showMonths: e.target.checked,
+                  })
+                }
+              />
+              <span>Months</span>
+            </label>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showDays}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showDays: e.target.checked,
+                  })
+                }
+              />
+              <span>Days</span>
+            </label>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showHours}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showHours: e.target.checked,
+                  })
+                }
+              />
+              <span>Hours</span>
+            </label>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showMinutes}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showMinutes: e.target.checked,
+                  })
+                }
+              />
+              <span>Minutes</span>
+            </label>
+
+            <label className="unit-toggle-row">
+              <input
+                type="checkbox"
+                checked={!!activeUnitsTimer.showSeconds}
+                onChange={(e) =>
+                  updateUnits(activeUnitsTimer._id, {
+                    showSeconds: e.target.checked,
+                  })
+                }
+              />
+              <span>Seconds</span>
+            </label>
+
+            <button
+              type="button"
+              className="ghost-button"
+              style={{ marginTop: 8, width: "100%", justifyContent: "center" }}
+              onClick={() => setOpenUnitsId(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

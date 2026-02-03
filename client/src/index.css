@@ -333,6 +333,7 @@ button {
 
 .timer-table-cell.actions-column {
   justify-content: flex-end;
+  gap: 6px;
 }
 
 .drag-column {
@@ -452,6 +453,72 @@ button {
   background-color: var(--danger-soft);
   box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.75);
   color: #fecaca;
+}
+
+.icon-button {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background-color: rgba(15, 23, 42, 0.85);
+  color: var(--text-softer);
+  padding: 3px 7px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease,
+    color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.icon-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.55);
+}
+
+.units-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    circle at top,
+    rgba(15, 23, 42, 0.9),
+    rgba(15, 23, 42, 0.98)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.units-modal {
+  min-width: 280px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background-color: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.9);
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 1), 0 0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.units-modal-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-softer);
+}
+
+.unit-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.unit-toggle-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
 }
 
 @media (max-width: 780px) {

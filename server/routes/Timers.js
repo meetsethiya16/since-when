@@ -14,18 +14,47 @@ router.post("/", async (req, res) => {
   res.json(timer);
 });
 
+// UPDATE UNITS
+router.patch("/:id/units", async (req, res) => {
+  const {
+    showYears,
+    showMonths,
+    showDays,
+    showHours,
+    showMinutes,
+    showSeconds,
+  } = req.body;
+
+  const timer = await Timer.findByIdAndUpdate(
+    req.params.id,
+    {
+      ...(typeof showYears === "boolean" && { showYears }),
+      ...(typeof showMonths === "boolean" && { showMonths }),
+      ...(typeof showDays === "boolean" && { showDays }),
+      ...(typeof showHours === "boolean" && { showHours }),
+      ...(typeof showMinutes === "boolean" && { showMinutes }),
+      ...(typeof showSeconds === "boolean" && { showSeconds }),
+    },
+    { new: true }
+  );
+
+  res.json(timer);
+});
+
 // REORDER
 router.put("/reorder", async (req, res) => {
   const { order } = req.body;
 
   if (!Array.isArray(order)) {
-    return res.status(400).json({ error: "order must be an array of timer IDs" });
+    return res
+      .status(400)
+      .json({ error: "order must be an array of timer IDs" });
   }
 
   await Promise.all(
     order.map((id, index) =>
-      Timer.findByIdAndUpdate(id, { order: index }).exec(),
-    ),
+      Timer.findByIdAndUpdate(id, { order: index }).exec()
+    )
   );
 
   res.json({ success: true });
