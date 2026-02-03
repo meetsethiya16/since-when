@@ -3,7 +3,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import TimerCard from "../components/TimerCard";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api/timers";
+const API = import.meta.env.VITE_API_URL";
 
 export default function TimerPage() {
   const [timers, setTimers] = useState([]);
