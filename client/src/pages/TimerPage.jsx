@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import dayjs from "dayjs";
 import TimerCard from "../components/TimerCard";
 
 const API = "http://localhost:5000/api/timers";
@@ -9,6 +10,7 @@ export default function TimerPage() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [draggingId, setDraggingId] = useState(null);
 
   const fetchTimers = async () => {
     const res = await axios.get(API);
@@ -30,6 +32,43 @@ export default function TimerPage() {
     setTitle("");
     setDate("");
     setTime("");
+    fetchTimers();
+  };
+
+  const saveOrder = async (nextTimers) => {
+    await axios.put(`${API}/reorder`, {
+      order: nextTimers.map((t) => t._id),
+    });
+  };
+
+  const handleDragStart = (id) => {
+    setDraggingId(id);
+  };
+
+  const handleDragOver = (id, event) => {
+    event.preventDefault();
+    if (!draggingId || draggingId === id) return;
+
+    setTimers((prev) => {
+      const currentIndex = prev.findIndex((t) => t._id === draggingId);
+      const targetIndex = prev.findIndex((t) => t._id === id);
+
+      if (currentIndex === -1 || targetIndex === -1) return prev;
+      const updated = [...prev];
+      const [moved] = updated.splice(currentIndex, 1);
+      updated.splice(targetIndex, 0, moved);
+      return updated;
+    });
+  };
+
+  const handleDrop = async () => {
+    if (!draggingId) return;
+    setDraggingId(null);
+    await saveOrder(timers);
+  };
+
+  const removeTimer = async (id) => {
+    await axios.delete(`${API}/${id}`);
     fetchTimers();
   };
 
@@ -108,13 +147,56 @@ export default function TimerPage() {
 
           {timers.length === 0 ? (
             <p className="empty-state">
-              You don&apos;t have any timers yet. Create one on the left to get
+              You don&apos;t have any timers yet. Create one above to get
               started.
             </p>
           ) : (
-            <div className="timer-grid">
+            <div className="timer-table">
+              <div className="timer-table-header-row">
+                <div className="timer-table-header-cell drag-column" />
+                <div className="timer-table-header-cell title-column">
+                  Timer
+                </div>
+                <div className="timer-table-header-cell value-column">
+                  Elapsed
+                </div>
+                <div className="timer-table-header-cell actions-column" />
+              </div>
               {timers.map((t) => (
-                <TimerCard key={t._id} timer={t} refresh={fetchTimers} />
+                <div
+                  key={t._id}
+                  className={`timer-table-row${
+                    draggingId === t._id ? " is-dragging" : ""
+                  }`}
+                  draggable
+                  onDragStart={() => handleDragStart(t._id)}
+                  onDragOver={(event) => handleDragOver(t._id, event)}
+                  onDrop={handleDrop}
+                  onDragEnd={handleDrop}
+                >
+                  <div className="timer-table-cell drag-column">
+                    <span className="drag-handle" aria-label="Reorder timer">
+                      ⋮⋮
+                    </span>
+                  </div>
+                  <div className="timer-table-cell title-column">
+                    <h3 className="timer-title">{t.title}</h3>
+                    <p className="timer-since">
+                      Since {dayjs(t.startDate).format("D MMM YYYY, HH:mm")}
+                    </p>
+                  </div>
+                  <div className="timer-table-cell value-column">
+                    <TimerCard timer={t} />
+                  </div>
+                  <div className="timer-table-cell actions-column">
+                    <button
+                      className="ghost-button ghost-button-danger"
+                      onClick={() => removeTimer(t._id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           )}

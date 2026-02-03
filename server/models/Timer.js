@@ -4,6 +4,7 @@ const TimerSchema = new mongoose.Schema(
   {
     title: String,
     startDate: Date,
+    order: { type: Number, default: 0 },
 
     showYears: { type: Boolean, default: true },
     showMonths: { type: Boolean, default: true },
