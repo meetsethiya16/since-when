@@ -12,10 +12,16 @@ export default function TimerPage() {
   const [time, setTime] = useState("");
   const [draggingId, setDraggingId] = useState(null);
   const [openUnitsId, setOpenUnitsId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchTimers = async () => {
-    const res = await axios.get(API);
-    setTimers(res.data);
+    setIsLoading(true);
+    try {
+      const res = await axios.get(API);
+      setTimers(res.data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -25,15 +31,20 @@ export default function TimerPage() {
   const createTimer = async () => {
     const startDate = new Date(`${date}T${time}`);
 
-    await axios.post(API, {
-      title,
-      startDate,
-    });
+    setIsLoading(true);
+    try {
+      await axios.post(API, {
+        title,
+        startDate,
+      });
 
-    setTitle("");
-    setDate("");
-    setTime("");
-    fetchTimers();
+      setTitle("");
+      setDate("");
+      setTime("");
+      await fetchTimers();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const saveOrder = async (nextTimers) => {
@@ -69,8 +80,13 @@ export default function TimerPage() {
   };
 
   const removeTimer = async (id) => {
-    await axios.delete(`${API}/${id}`);
-    fetchTimers();
+    setIsLoading(true);
+    try {
+      await axios.delete(`${API}/${id}`);
+      await fetchTimers();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleUnitsMenu = (id) => {
@@ -111,7 +127,7 @@ export default function TimerPage() {
     const res = await axios.patch(`${API}/${id}/units`, payload);
 
     setTimers((prev) =>
-      prev.map((t) => (t._id === id ? { ...t, ...res.data } : t))
+      prev.map((t) => (t._id === id ? { ...t, ...res.data } : t)),
     );
   };
 
@@ -176,9 +192,9 @@ export default function TimerPage() {
           <button
             className="primary-button"
             onClick={createTimer}
-            disabled={!title || !date || !time}
+            disabled={!title || !date || !time || isLoading}
           >
-            Add timer
+            {isLoading ? "Adding..." : "Add timer"}
           </button>
         </section>
 
@@ -192,8 +208,9 @@ export default function TimerPage() {
 
           {timers.length === 0 ? (
             <p className="empty-state">
-              You don&apos;t have any timers yet. Create one above to get
-              started.
+              {isLoading
+                ? "Loading your timers..."
+                : "You don't have any timers yet. Create one above to get started."}
             </p>
           ) : (
             <div className="timer-table">
@@ -237,6 +254,7 @@ export default function TimerPage() {
                     <button
                       className="ghost-button ghost-button-danger"
                       onClick={() => removeTimer(t._id)}
+                      disabled={isLoading}
                     >
                       Delete
                     </button>
