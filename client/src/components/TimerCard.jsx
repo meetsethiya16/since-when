@@ -5,7 +5,12 @@ import dayjs from "dayjs";
 const API = "http://localhost:5000/api/timers";
 
 export default function TimerCard({ timer, refresh }) {
-  const [diff, setDiff] = useState({});
+  const [diff, setDiff] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   const calc = () => {
     const now = dayjs();
@@ -35,16 +40,41 @@ export default function TimerCard({ timer, refresh }) {
   };
 
   return (
-    <div style={{ marginTop: 20 }}>
-      <h3>{timer.title}</h3>
-
-      <div>
-        {timer.showDays && `${diff.days}d `}
-        {timer.showHours && `${diff.hours}h `}
-        {timer.showSeconds && `${diff.seconds}s`}
+    <div className="timer-card">
+      <div className="timer-card-header">
+        <h3 className="timer-title">{timer.title}</h3>
+        <button className="ghost-button ghost-button-danger" onClick={remove}>
+          Delete
+        </button>
       </div>
 
-      <button onClick={remove}>Delete</button>
+      <p className="timer-since">
+        Since{" "}
+        {dayjs(timer.startDate).format("D MMM YYYY, HH:mm")}
+      </p>
+
+      <div className="timer-value">
+        {timer.showDays && (
+          <span className="timer-unit">
+            <span className="timer-number">{diff.days}</span>
+            <span className="timer-label">days</span>
+          </span>
+        )}
+
+        {timer.showHours && (
+          <span className="timer-unit">
+            <span className="timer-number">{diff.hours}</span>
+            <span className="timer-label">hours</span>
+          </span>
+        )}
+
+        {timer.showSeconds && (
+          <span className="timer-unit">
+            <span className="timer-number">{diff.seconds}</span>
+            <span className="timer-label">seconds</span>
+          </span>
+        )}
+      </div>
     </div>
   );
 }
