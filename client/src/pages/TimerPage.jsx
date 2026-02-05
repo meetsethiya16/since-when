@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../api/client";
 import dayjs from "dayjs";
 import TimerCard from "../components/TimerCard";
 
@@ -209,7 +209,7 @@ export default function TimerPage() {
           {timers.length === 0 ? (
             <p className="empty-state">
               {isLoading
-                ? "Loading your timers..."
+                ? "Starting server… please wait a few seconds"
                 : "You don't have any timers yet. Create one above to get started."}
             </p>
           ) : (
