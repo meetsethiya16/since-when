@@ -14,4 +14,9 @@ mongoose
 
 app.use("/api/timers", require("./routes/timers"));
 
+/* ✅ ADD THIS (keep-alive health check) */
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.listen(5000, () => console.log("Server running on 5000"));
