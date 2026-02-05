@@ -15,7 +15,6 @@ export default function TimerPage() {
   const fetchTimers = async () => {
     setIsLoading(true);
     try {
-      // ✅ changed
       const res = await axios.get("/");
       setTimers(res.data);
     } finally {
@@ -32,7 +31,6 @@ export default function TimerPage() {
 
     setIsLoading(true);
     try {
-      // ✅ changed
       await axios.post("/", {
         title,
         startDate,
@@ -48,7 +46,6 @@ export default function TimerPage() {
   };
 
   const saveOrder = async (nextTimers) => {
-    // ✅ changed
     await axios.put("/reorder", {
       order: nextTimers.map((t) => t._id),
     });
@@ -83,7 +80,6 @@ export default function TimerPage() {
   const removeTimer = async (id) => {
     setIsLoading(true);
     try {
-      // ✅ changed
       await axios.delete(`/${id}`);
       await fetchTimers();
     } finally {
@@ -126,7 +122,6 @@ export default function TimerPage() {
           : existing.showSeconds,
     };
 
-    // ✅ changed
     const res = await axios.patch(`/${id}/units`, payload);
 
     setTimers((prev) =>
@@ -262,6 +257,16 @@ export default function TimerPage() {
                       disabled={isLoading}
                     >
                       Delete
+                    </button>
+
+                    {/* ✅ YOUR BUTTON RESTORED */}
+                    <button
+                      type="button"
+                      className="icon-button"
+                      aria-label="Timer display options"
+                      onClick={() => toggleUnitsMenu(t._id)}
+                    >
+                      ⋯
                     </button>
                   </div>
                 </div>
