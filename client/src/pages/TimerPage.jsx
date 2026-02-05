@@ -31,10 +31,7 @@ export default function TimerPage() {
 
     setIsLoading(true);
     try {
-      await axios.post("/", {
-        title,
-        startDate,
-      });
+      await axios.post("/", { title, startDate });
 
       setTitle("");
       setDate("");
@@ -51,9 +48,7 @@ export default function TimerPage() {
     });
   };
 
-  const handleDragStart = (id) => {
-    setDraggingId(id);
-  };
+  const handleDragStart = (id) => setDraggingId(id);
 
   const handleDragOver = (id, event) => {
     event.preventDefault();
@@ -64,6 +59,7 @@ export default function TimerPage() {
       const targetIndex = prev.findIndex((t) => t._id === id);
 
       if (currentIndex === -1 || targetIndex === -1) return prev;
+
       const updated = [...prev];
       const [moved] = updated.splice(currentIndex, 1);
       updated.splice(targetIndex, 0, moved);
@@ -96,30 +92,12 @@ export default function TimerPage() {
     if (!existing) return;
 
     const payload = {
-      showYears:
-        typeof partial.showYears === "boolean"
-          ? partial.showYears
-          : existing.showYears,
-      showMonths:
-        typeof partial.showMonths === "boolean"
-          ? partial.showMonths
-          : existing.showMonths,
-      showDays:
-        typeof partial.showDays === "boolean"
-          ? partial.showDays
-          : existing.showDays,
-      showHours:
-        typeof partial.showHours === "boolean"
-          ? partial.showHours
-          : existing.showHours,
-      showMinutes:
-        typeof partial.showMinutes === "boolean"
-          ? partial.showMinutes
-          : existing.showMinutes,
-      showSeconds:
-        typeof partial.showSeconds === "boolean"
-          ? partial.showSeconds
-          : existing.showSeconds,
+      showYears: partial.showYears ?? existing.showYears,
+      showMonths: partial.showMonths ?? existing.showMonths,
+      showDays: partial.showDays ?? existing.showDays,
+      showHours: partial.showHours ?? existing.showHours,
+      showMinutes: partial.showMinutes ?? existing.showMinutes,
+      showSeconds: partial.showSeconds ?? existing.showSeconds,
     };
 
     const res = await axios.patch(`/${id}/units`, payload);
@@ -147,44 +125,22 @@ export default function TimerPage() {
           <h2 className="section-title">Create a timer</h2>
 
           <div className="timer-input-grid">
-            <div className="field">
-              <label className="field-label" htmlFor="title">
-                Title
-              </label>
-              <input
-                id="title"
-                className="field-input"
-                placeholder="e.g. Since I started this job"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
-            <div className="field">
-              <label className="field-label" htmlFor="date">
-                Start date
-              </label>
-              <input
-                id="date"
-                type="date"
-                className="field-input"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-              />
-            </div>
-
-            <div className="field">
-              <label className="field-label" htmlFor="time">
-                Start time
-              </label>
-              <input
-                id="time"
-                type="time"
-                className="field-input"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-              />
-            </div>
+            <input
+              className="field-input"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            />
           </div>
 
           <button
@@ -197,84 +153,68 @@ export default function TimerPage() {
         </section>
 
         <section className="timer-list">
-          <div className="timer-list-header">
-            <h2 className="section-title">Active timers</h2>
-            <span className="timer-count-pill">
-              {timers.length} {timers.length === 1 ? "timer" : "timers"}
-            </span>
-          </div>
+          {timers.map((t) => (
+            <div key={t._id} className="timer-table-row">
+              <TimerCard timer={t} />
 
-          {timers.length === 0 ? (
-            <p className="empty-state">
-              {isLoading
-                ? "Starting server… please wait a few seconds"
-                : "You don't have any timers yet. Create one above to get started."}
-            </p>
-          ) : (
-            <div className="timer-table">
-              <div className="timer-table-header-row">
-                <div className="timer-table-header-cell drag-column" />
-                <div className="timer-table-header-cell title-column">
-                  Timer
-                </div>
-                <div className="timer-table-header-cell value-column">
-                  Elapsed
-                </div>
-                <div className="timer-table-header-cell actions-column" />
-              </div>
-
-              {timers.map((t) => (
-                <div
-                  key={t._id}
-                  className={`timer-table-row${
-                    draggingId === t._id ? " is-dragging" : ""
-                  }`}
-                  draggable
-                  onDragStart={() => handleDragStart(t._id)}
-                  onDragOver={(event) => handleDragOver(t._id, event)}
-                  onDrop={handleDrop}
-                  onDragEnd={handleDrop}
+              <div className="timer-table-cell actions-column">
+                <button
+                  className="ghost-button ghost-button-danger"
+                  onClick={() => removeTimer(t._id)}
                 >
-                  <div className="timer-table-cell drag-column">
-                    <span className="drag-handle">⋮⋮</span>
-                  </div>
+                  Delete
+                </button>
 
-                  <div className="timer-table-cell title-column">
-                    <h3 className="timer-title">{t.title}</h3>
-                    <p className="timer-since">
-                      Since {dayjs(t.startDate).format("D MMM YYYY, HH:mm")}
-                    </p>
-                  </div>
-
-                  <div className="timer-table-cell value-column">
-                    <TimerCard timer={t} />
-                  </div>
-
-                  <div className="timer-table-cell actions-column">
-                    <button
-                      className="ghost-button ghost-button-danger"
-                      onClick={() => removeTimer(t._id)}
-                      disabled={isLoading}
-                    >
-                      Delete
-                    </button>
-
-                    {/* ✅ YOUR BUTTON RESTORED */}
-                    <button
-                      type="button"
-                      className="icon-button"
-                      aria-label="Timer display options"
-                      onClick={() => toggleUnitsMenu(t._id)}
-                    >
-                      ⋯
-                    </button>
-                  </div>
-                </div>
-              ))}
+                {/* ✅ YOUR BUTTON */}
+                <button
+                  type="button"
+                  className="icon-button"
+                  aria-label="Timer display options"
+                  onClick={() => toggleUnitsMenu(t._id)}
+                >
+                  ⋯
+                </button>
+              </div>
             </div>
-          )}
+          ))}
         </section>
       </main>
+
+      {/* ✅ YOUR UNITS MODAL RESTORED */}
+      {openUnitsId && activeUnitsTimer && (
+        <div className="units-overlay" onClick={() => setOpenUnitsId(null)}>
+          <div className="units-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="units-modal-title">Units to display</p>
+
+            {["Years", "Months", "Days", "Hours", "Minutes", "Seconds"].map(
+              (label) => {
+                const key = "show" + label;
+                return (
+                  <label key={key} className="unit-toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={!!activeUnitsTimer[key]}
+                      onChange={(e) =>
+                        updateUnits(activeUnitsTimer._id, {
+                          [key]: e.target.checked,
+                        })
+                      }
+                    />
+                    <span>{label}</span>
+                  </label>
+                );
+              },
+            )}
+
+            <button
+              className="ghost-button"
+              onClick={() => setOpenUnitsId(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
