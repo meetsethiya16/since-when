@@ -242,7 +242,7 @@ export default function TimerPage() {
                   <div className="timer-table-cell title-column">
                     <h3 className="timer-title">{t.title}</h3>
                     <p className="timer-since">
-                      Since {dayjs(t.startDate).format("D MMM YYYY, hh:mm A")}
+                      {dayjs(t.startDate).format("D MMM YYYY, hh:mm A")}
                     </p>
                   </div>
                   <div className="timer-table-cell value-column">
