@@ -16,31 +16,48 @@ export default function TimerCard({ timer }) {
     const now = dayjs();
     const start = dayjs(timer.startDate);
 
-    const totalMs = now.diff(start);
-    const totalSeconds = Math.floor(totalMs / 1000);
+    // If the start date is in the future
+    if (start.isAfter(now)) {
+      setDiff({
+        years: 0,
+        months: 0,
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        totalSeconds: 0,
+      });
 
-    let remaining = totalSeconds;
+      return;
+    }
 
-    const secondsInYear = 365 * 24 * 60 * 60;
-    const secondsInMonth = 30 * 24 * 60 * 60;
-    const secondsInDay = 24 * 60 * 60;
-    const secondsInHour = 60 * 60;
-    const secondsInMinute = 60;
+    let cursor = start;
 
-    const years = Math.floor(remaining / secondsInYear);
-    remaining %= secondsInYear;
+    // Complete calendar years
+    const years = now.diff(cursor, "year");
+    cursor = cursor.add(years, "year");
 
-    const months = Math.floor(remaining / secondsInMonth);
-    remaining %= secondsInMonth;
+    // Complete calendar months
+    const months = now.diff(cursor, "month");
+    cursor = cursor.add(months, "month");
 
-    const days = Math.floor(remaining / secondsInDay);
-    remaining %= secondsInDay;
+    // Remaining days
+    const days = now.diff(cursor, "day");
+    cursor = cursor.add(days, "day");
 
-    const hours = Math.floor(remaining / secondsInHour);
-    remaining %= secondsInHour;
+    // Remaining hours
+    const hours = now.diff(cursor, "hour");
+    cursor = cursor.add(hours, "hour");
 
-    const minutes = Math.floor(remaining / secondsInMinute);
-    const seconds = remaining % secondsInMinute;
+    // Remaining minutes
+    const minutes = now.diff(cursor, "minute");
+    cursor = cursor.add(minutes, "minute");
+
+    // Remaining seconds
+    const seconds = now.diff(cursor, "second");
+
+    // Total elapsed seconds
+    const totalSeconds = now.diff(start, "second");
 
     setDiff({
       years,
@@ -55,23 +72,54 @@ export default function TimerCard({ timer }) {
 
   useEffect(() => {
     calc();
-    const i = setInterval(calc, 100);
-    return () => clearInterval(i);
-  }, []);
 
-  const { years, months, days, hours, minutes, seconds, totalSeconds } = diff;
+    const interval = setInterval(calc, 1000);
 
-  const thresholdMinutes = totalSeconds >= 60;
-  const thresholdHours = totalSeconds >= 60 * 60;
-  const thresholdDays = totalSeconds >= 24 * 60 * 60;
-  const thresholdMonths = totalSeconds >= 30 * 24 * 60 * 60;
-  const thresholdYears = totalSeconds >= 365 * 24 * 60 * 60;
+    return () => clearInterval(interval);
+  }, [timer.startDate]);
 
-  const showYears = timer.showYears && thresholdYears;
-  const showMonths = timer.showMonths && thresholdMonths;
-  const showDays = timer.showDays && thresholdDays;
-  const showHours = timer.showHours && thresholdHours;
-  const showMinutes = timer.showMinutes && thresholdMinutes;
+  const {
+    years,
+    months,
+    days,
+    hours,
+    minutes,
+    seconds,
+  } = diff;
+
+  /*
+   * Show a unit only when:
+   * 1. The user has enabled that unit
+   * 2. There is actually something meaningful to display
+   *
+   * Once a larger unit exists, smaller units are also allowed.
+   */
+
+  const showYears = timer.showYears && years > 0;
+
+  const showMonths =
+    timer.showMonths && (years > 0 || months > 0);
+
+  const showDays =
+    timer.showDays &&
+    (years > 0 || months > 0 || days > 0);
+
+  const showHours =
+    timer.showHours &&
+    (years > 0 ||
+      months > 0 ||
+      days > 0 ||
+      hours > 0);
+
+  const showMinutes =
+    timer.showMinutes &&
+    (years > 0 ||
+      months > 0 ||
+      days > 0 ||
+      hours > 0 ||
+      minutes > 0);
+
+  // Seconds are shown by default unless explicitly disabled
   const showSeconds = timer.showSeconds !== false;
 
   return (
@@ -79,44 +127,57 @@ export default function TimerCard({ timer }) {
       {showYears && (
         <span className="timer-unit">
           <span className="timer-number">{years}</span>
-          <span className="timer-label">years</span>
+          <span className="timer-label">
+            {years === 1 ? "year" : "years"}
+          </span>
         </span>
       )}
 
       {showMonths && (
         <span className="timer-unit">
           <span className="timer-number">{months}</span>
-          <span className="timer-label">months</span>
+          <span className="timer-label">
+            {months === 1 ? "month" : "months"}
+          </span>
         </span>
       )}
 
       {showDays && (
         <span className="timer-unit">
           <span className="timer-number">{days}</span>
-          <span className="timer-label">days</span>
+          <span className="timer-label">
+            {days === 1 ? "day" : "days"}
+          </span>
         </span>
       )}
 
       {showHours && (
         <span className="timer-unit">
           <span className="timer-number">{hours}</span>
-          <span className="timer-label">hours</span>
+          <span className="timer-label">
+            {hours === 1 ? "hour" : "hours"}
+          </span>
         </span>
       )}
 
       {showMinutes && (
         <span className="timer-unit">
           <span className="timer-number">{minutes}</span>
-          <span className="timer-label">minutes</span>
+          <span className="timer-label">
+            {minutes === 1 ? "minute" : "minutes"}
+          </span>
         </span>
       )}
 
       {showSeconds && (
         <span className="timer-unit">
           <span className="timer-number">{seconds}</span>
-          <span className="timer-label">seconds</span>
+          <span className="timer-label">
+            {seconds === 1 ? "second" : "seconds"}
+          </span>
         </span>
       )}
     </div>
   );
 }
+```
