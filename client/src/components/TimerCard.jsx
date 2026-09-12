@@ -180,4 +180,3 @@ export default function TimerCard({ timer }) {
     </div>
   );
 }
-```
