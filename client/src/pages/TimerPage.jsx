@@ -157,6 +157,7 @@ export default function TimerPage() {
                 placeholder="e.g. Since I started this job"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                autoFocus
               />
             </div>
 
